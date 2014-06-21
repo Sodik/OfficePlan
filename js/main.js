@@ -1,4 +1,5 @@
 ;(function(){
+  var cx = React.addons.classSet;
   var Data = [{
       firstName: 'Alex',
       secondName: 'SecondName',
@@ -60,14 +61,17 @@
       top: 200,
       left: 500
     }];
+
   var Info = React.createClass({
     render: function(){
       console.log('Info rendering')
       return React.DOM.div({
+          key: 'info',
           id: 'info'
         },
         this.renderItems(),
         React.DOM.button({
+            key: 'mode',
             ref: 'mode',
             id: 'mode-btn',
             onMouseDown: this.props.clickHandler
@@ -82,8 +86,9 @@
     },
 
     renderItems: function(){
-      return _.map(this.props.fields, _.bind(function(fieldName){
-        return React.DOM.input({
+      return _.map(this.props.fields, _.bind(function(fieldName, ind){
+        return InputField({
+          key: 'item' + ind,
           ref: fieldName,
           name: fieldName,
           onChange: this.props.onChange,
@@ -98,6 +103,7 @@
       }, false);
     }
   });
+
   var Plan = React.createClass({
     keyMask: '#000000',
     counter: 0,
@@ -105,9 +111,11 @@
     render: function(){
       console.log('Plan rendering')
       return React.DOM.div({
-         id: 'plan'
+          key: 'plan',
+          id: 'plan'
         },
         React.DOM.canvas({
+          key: 'canvas',
           ref: 'canvas',
           id: 'canvas',
           width: 600,
@@ -115,6 +123,7 @@
           onMouseDown: this.dragStart
         }),
         React.DOM.canvas({
+          key: 'fake-canvas',
           ref: 'fake-canvas',
           id: 'fake-canvas',
           width: 600,
@@ -127,17 +136,17 @@
       this.canvas = this.refs['canvas'].getDOMNode();
       this.ctx = this.canvas.getContext('2d');
       this.fakeCanvas = this.refs['fake-canvas'].getDOMNode();
+      this.fakeCanvas.style.cssText = 'position: absolute; top: -9999px;';
       this.fakeCtx = this.fakeCanvas.getContext('2d');
       this.canvasOffset = getOffset(this.canvas);
 
-      this.renderItems();
+      this.preRender();
     },
 
-    renderItems: function(){
-      this.canvas.width = this.canvas.width;
-      this.fakeCanvas.width = this.canvas.width;
+    preRender: function(){
       this.counter = 0;
       this.fakeItems = {};
+
       _.forEach(this.props.collection, _.bind(function(item){
         this.ctx.fillStyle = 'red';
         this.ctx.fillRect(item.left, item.top, this.props.width, this.props.height);
@@ -147,6 +156,15 @@
 
         this.fakeCtx.fillStyle = key;
         this.fakeCtx.fillRect(item.left, item.top, this.props.width, this.props.height);
+      }, this));
+    },
+
+    renderItems: function(canvas){
+      canvas.width = canvas.width;
+      var ctx = canvas.getContext('2d');
+      _.forIn(this.fakeItems, _.bind(function(item, key){
+        ctx.fillStyle = canvas.id === 'fake-canvas' ? key : 'red';
+        ctx.fillRect(item.left, item.top, this.props.width, this.props.height);
       }, this));
     },
 
@@ -162,8 +180,9 @@
       this.currentItem = this.getItem(this.fakeCtx.getImageData(this.coords.left, this.coords.top, 1, 1));
       if(this.currentItem){
         this.props.onSelected(this.currentItem);
-        document.addEventListener('click', this.clickOutside, false);
         if(!this.props.adminMode) return;
+        document.addEventListener('click', this.clickOutside, false);
+        this.canvas.className = 'dragged';
         this.shift = {
           top: e.pageY - this.canvasOffset.top - this.currentItem.top,
           left: e.pageX - this.canvasOffset.left - this.currentItem.left
@@ -176,13 +195,15 @@
     dragEnd: function(){
       this.canvas.removeEventListener('mousemove', this.dragMove);
       document.removeEventListener('mouseup', this.dragEnd, false);
+      this.renderItems(this.fakeCanvas);
+      this.canvas.className = '';
     },
 
     dragMove: function(e){
       if(this.currentItem){
         this.currentItem.top = Math.min(Math.max(e.pageY - this.shift.top - this.canvasOffset.top, 0), this.canvas.height - this.props.height);
         this.currentItem.left = Math.min(Math.max(e.pageX - this.shift.left - this.canvasOffset.left, 0), this.canvas.width - this.props.width);
-        this.renderItems();
+        this.renderItems(this.canvas);
       }
     },
 
@@ -220,30 +241,43 @@
         return '#' + this.componentToHex(data[0]) + this.componentToHex(data[1]) + this.componentToHex(data[2]);
     },
 
-    shouldComponentUpdate: function(){
-      return false;
+    /*shouldComponentUpdate: function(newOptions){
+      return  false;
+    },*/
+
+    componentDidUpdate: function(){
+      this.preRender();
     }
   });
+
   var OfficePlan = React.createClass({
     render: function(){
       console.log('OfficePlan rendering')
       return React.DOM.div({
+          key: 'app',
           id: 'app'
         },
         Plan({
-          collection: Data,
+          key: 'plan',
+          ref: 'plan',
+          collection: this.props.data,
           width: 20,
           height: 20,
           onSelected: this.selectedHandler,
-          adminMode: this.state.adminMode,
-          ref: 'plan'
+          adminMode: this.state.adminMode
         }),
         Info({
+          key: 'info',
+          ref: 'info',
           onChange: this.changeHandler,
           adminMode: this.state.adminMode,
           clickHandler: this.buttonHandler,
-          fields: ['firstName', 'secondName', 'position'],
-          ref: 'info'
+          fields: this.props.fields
+        }),
+        Creator({
+          key: 'creator',
+          fields: this.props.fields,
+          createHandler: this.createHandler
         })
       );
     },
@@ -282,9 +316,97 @@
       this.setState({
         adminMode: !this.state.adminMode
       });
+    },
+
+    createHandler: function(newItem){
+      newItem.top = 0;
+      newItem.left = 0;
+
+      this.setProps({data: this.props.data.concat(newItem)});
     }
   });
-  React.renderComponent( OfficePlan(), document.body );
+
+  var Creator = React.createClass({
+    render: function(){
+      console.log('Creator rendering');
+      return React.DOM.div({
+        key: 'creator',
+        id: 'creator'
+      },
+        CreateItem({
+          ref: 'fields',
+          key: 'create-item',
+          fields: this.props.fields
+        }),
+        React.DOM.button({
+          key: 'item-delete',
+          id: 'delete',
+          ref: 'delete'
+        }, 'Delete')
+      );
+    },
+
+    createItem: function(error, data){
+      if(!error){
+        this.props.createHandler(data);
+      }
+    }
+  });
+
+  var CreateItem = React.createClass({
+    render: function(){
+      return React.DOM.div({
+        key: 'create-item',
+        id: 'create-item',
+        ref: 'create'
+      },
+        this.renderItems(),
+        React.DOM.button({
+          key: 'create-button',
+          onClick: this.clickHandler
+        }, 'Create')
+      );
+    },
+
+    renderItems: function(){
+      return _.map(this.props.fields, _.bind(function(fieldName, ind){
+        return InputField({
+          key: 'item' + ind,
+          ref: 'item' + fieldName,
+          name: 'item' + fieldName
+        });
+      }, this));
+    },
+
+    clickHandler: function(){
+      console.log(this.props.children)
+    }
+  });
+
+  var InputField = React.createClass({
+    render: function(){
+      classes = cx({
+        'error': !this.state.valid
+      });
+      return React.DOM.input({
+        key: this.props.key,
+        className: classes,
+        type: 'text',
+        name: this.props.name,
+        ref: this.props.ref,
+        disabled: this.props.disabled,
+        onChange: this.props.onChange
+      });
+    },
+
+    getInitialState: function(){
+      return {
+        valid: true
+      }
+    }
+  });
+
+  React.renderComponent( OfficePlan({fields: ['firstName', 'secondName', 'position'], data: Data}), document.body );
 
   function getOffset(obj) {
     if(obj.getBoundingClientRect){
