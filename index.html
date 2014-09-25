@@ -1,16 +1,90 @@
-<!DOCTYPE>
+<!DOCTYPE html>
 <html>
 <head>
+  <meta charset="utf-8">
   <title>OfficePlan</title>
   <style type="text/css">
-    .dragged {
-      cursor: crosshair;
+    body {
+      margin: 0;
+    }
+    #info {
+      position: fixed;
+      width: 300px;
+      right: 0;
+      top: 0;
+      background: #ccc;
+    }
+
+    dl {
+      margin: 0;
+    }
+    dt {
+      float: left;
+      margin-right: 5px;
     }
   </style>
 </head>
 <body>
-  <script type="text/javascript" src="js/libs/react.min.js"></script>
-  <script type="text/javascript" src="js/libs/lodash.min.js"></script>
+  <input id="search" placeholder="Search">
+  <button id="mode">User</button>
+  <canvas width="1600" height="997" id="plan"></canvas>
+  <div id="info"></div>
+  <div id="edit">
+    <form class="content"></form>
+    <div class="control">
+      <button id="update">Update</button>
+      <button id="remove">Remove</button>
+      <button id="create">Create</button>
+    </div>
+  </div>
+   <script type="text/html" id="edit_tmpl">
+    <dl>
+      <dt>Name:</dt>
+      <dd><input name="name" type="text" value="<%= data['name'] || '' %>"></dd>
+      <dt>Address:</dt>
+      <dd><input name="address" type="text" value="<%= data['address'] || '' %>"></dd>
+      <dt>Phone:</dt>
+      <dd><input name="phone" type="text" value="<%= data['phone'] || '' %>"></dd>
+      <dt>Email:</dt>
+      <dd><input name="email" type="text" value="<%= data['email'] || '' %>"></dd>
+      <dt>Website:</dt>
+      <dd><input name="website" type="text" value="<%= data['website'] || '' %>"></dd>
+      <dt>Skype:</dt>
+      <dd><input name="skype" type="text" value="<%= data['skype'] || '' %>"></dd>
+      <dt>Birthday:</dt>
+      <dd><input name="birthday" type="text" value="<%= data['birthday'] || '' %>"></dd>
+    </dl>
+  </script>
+  <script type="text/html" id="info_tmpl">
+    <dl>
+      <dt>Name:</dt>
+      <dd><%= data['name'] || '' %></dd>
+      <dt>Company:</dt>
+      <dd>CHI Software</dd>
+      <dt>Address:</dt>
+      <dd><%= data['address'] || '' %></dd>
+      <dt>Phone:</dt>
+      <dd><%= data['phone'] || '' %></dd>
+      <dt>Email:</dt>
+      <dd>
+        <% if(data['email']){ %>
+          <a href="mailto:<%= data['email'] %>"><%= data['email'] %></a>
+        <% } %>
+      </dd>
+      <dt>Website:</dt>
+      <dd><%= data['website'] || '' %></dd>
+      <dt>Skype:</dt>
+      <dd>
+        <% if(data['skype']){ %>
+          <a href="skype:<%= data['skype'] %>"><%= data['skype'] %></a>
+        <% } %>
+      </dd>
+      <dt>Birthday:</dt>
+      <dd><%= data['birthday'] || '' %></dd>
+    </dl>
+  </script>
+  <script type="text/javascript" src="js/libs/fabric.min.js"></script>
+  <script type="text/javascript" src="js/libs/lodash.js"></script>
   <script type="text/javascript" src="js/main.js"></script>
 </body>
 </html>
