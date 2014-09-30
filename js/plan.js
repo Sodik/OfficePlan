@@ -12,7 +12,7 @@ var planProto = {
       hoverCursor: 'pointer',
       selection: false,
     });
-    this.stage.setBackgroundImage('images/main-bg.jpg', this.stage.renderAll.bind(this.stage));
+    this.stage.setBackgroundImage('./images/main-bg.jpg', this.stage.renderAll.bind(this.stage));
   },
   refresh:function(){
     this.stage.clear();
