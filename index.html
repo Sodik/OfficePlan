@@ -16,41 +16,10 @@
     }
   </style>
   <script type="text/javascript" src="js/libs/angular.min.js"></script>
+  <script type="text/javascript" src="js/libs/angular-ui-router.min.js"></script>
 </head>
-<body ng-controller="appCtrl">
-  <input id="search" placeholder="Search" ng-keyup="search($event)">
-  <canvas id="plan" width="1600" height="997" ng-controller="planCtrl"></canvas>
-  <div id="info" ng-hide="!selectedItem">
-    <ul>
-      <li><strong class="heading">Name: </strong>{{selectedItem.info.name}}</li>
-      <li><strong class="heading">Job title: </strong>{{selectedItem.info.job_title}}</li>
-      <li><strong class="heading">Company: </strong>{{selectedItem.info.company}}</li>
-      <li><strong class="heading">Address: </strong>{{selectedItem.info.address}}</li>
-      <li><strong class="heading">Phone: </strong>{{selectedItem.info.phone}}</li>
-      <li><strong class="heading">Email: </strong><a href="mailto:{{selectedItem.info.email}}">{{selectedItem.info.email}}</a></li>
-      <li><strong class="heading">Website: </strong><a href="selectedItem.info.website">{{selectedItem.info.website}}</a></li>
-      <li><strong class="heading">Skype: </strong><a href="skype:{{selectedItem.info.skype}}">{{selectedItem.info.skype}}</a></li>
-      <li><strong class="heading">Birthday: </strong>{{selectedItem.info.birthday}}</li>
-    </ul>
-  </div>
-  <div id="edit" ng-controller="editCtrl">
-    <ul>
-      <li><strong class="heading">Name: </strong><input type="text" ng-model="data.info.name"></li>
-      <li><strong class="heading">Job title: </strong><input type="text" ng-model="data.info.job_title"></li>
-      <li><strong class="heading">Company: </strong><input type="text" ng-model="data.info.company"></li>
-      <li><strong class="heading">Address: </strong><input type="text" ng-model="data.info.address"></li>
-      <li><strong class="heading">Phone: </strong><input type="text" ng-model="data.info.phone"></li>
-      <li><strong class="heading">Email: </strong><input type="text" ng-model="data.info.email"></li>
-      <li><strong class="heading">Website: </strong><input type="text" ng-model="data.info.website"></li>
-      <li><strong class="heading">Skype: </strong><input type="text" ng-model="data.info.skype"></li>
-      <li><strong class="heading">Birthday: </strong><input type="text" ng-model="data.info.birthday"></li>
-    </ul>
-    <div class="control">
-      <button id="update" ng-click="update()">Update</button>
-      <button id="remove" ng-click="remove()">Remove</button>
-      <button id="create" ng-click="create()">Create</button>
-    </div>
-  </div>
+<body>
+  <div ui-view></div>
   <script type="text/javascript" src="js/libs/fabric.min.js"></script>
   <script type="text/javascript" src="js/libs/lodash.js"></script>
   <script type="text/javascript" src="js/main.js"></script>
