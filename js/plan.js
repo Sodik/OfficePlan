@@ -9,7 +9,8 @@ var planProto = {
   createStage: function(){
     this.canvas = document.getElementById('plan');
     this.stage = new fabric.Canvas(this.canvas, {
-      hoverCursor: 'pointer'
+      hoverCursor: 'pointer',
+      selection: false,
     });
     this.stage.setBackgroundImage('images/main-bg.jpg', this.stage.renderAll.bind(this.stage));
   },
