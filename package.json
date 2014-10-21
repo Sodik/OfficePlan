@@ -1,0 +1,24 @@
+{
+  "name": "OfficePlan",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Sodik/OfficePlan.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Sodik/OfficePlan/issues"
+  },
+  "homepage": "https://github.com/Sodik/OfficePlan",
+  "dependencies": {
+    "mongodb": "^1.4.19",
+    "q": "^1.0.1"
+  }
+}

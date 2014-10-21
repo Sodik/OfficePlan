@@ -4,7 +4,8 @@ var requestHandlers = require('./requestHandlers');
 
 var handlers = {
   '/': requestHandlers.home,
-  '/data': requestHandlers.data
+  '/data': requestHandlers.data,
+  '/create': requestHandlers.create
 }
 
 server(router, handlers);

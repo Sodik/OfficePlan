@@ -1,7 +1,47 @@
 var fs = require('fs');
+var mongo = require('mongodb');
+var qs = require('querystring');
+var Q = require('q');
+var dataObject = {
+  currentDb: null,
+  connect: function(){
+    var defer = Q.defer();
+    mongo.MongoClient.connect('mongodb://localhost:27017/plan', function(err, db){
+      if(err){
+        defer.reject(err);
+        return console.log(err);
+      }
+      this.currentDb = db;
+      defer.resolve(db);
+    }.bind(this));
+    return defer.promise;
+  },
+  getCollection: function(collectionName){
+    return this.currentDb.collection(collectionName);
+  },
+  close: function(){
+    if(this.currentDb){
+      this.currentDb.close();
+    }
+  }
+}
 
-var data = {people: [{
-    id: 1,
+module.exports = {
+  home: function(res){
+    res.writeHeader(200, {'Content-Type': 'text/html'});
+    fs.readFile('index.html', 'utf-8', function(err, content){
+      if(err){
+        return console.log(err);
+      }
+      res.end(content, 'utf-8');
+    });
+    console.log('Start')
+  },
+  data: function(res){
+    dataObject.connect().then(function(db){
+      var collection = db.collection('plan');
+      /*collection.insert([
+        {
     info: {
       name: 'Алексей Степченков',
       company: 'CHI Software',
@@ -16,7 +56,6 @@ var data = {people: [{
       left: 281
     }
   },{
-    id: 2,
     info: {
       name: 'Сергей Войчук',
       company: 'CHI Software',
@@ -31,7 +70,6 @@ var data = {people: [{
       left: 281
     }
   },{
-    id: 3,
     info: {
       name: 'Рита Стрельницкая',
       company: 'CHI Software',
@@ -46,7 +84,6 @@ var data = {people: [{
       left: 281
     }
   },{
-    id: 4,
     info: {
       name: 'Дарья Гармаш',
       company: 'CHI Software',
@@ -61,7 +98,6 @@ var data = {people: [{
       left: 281
     }
   },{
-    id: 5,
     info: {
       name: 'Яромир Козак',
       company: 'CHI Software',
@@ -75,23 +111,36 @@ var data = {people: [{
       top: 138,
       left: 365
     }
-  }],
-    signIn: false
-  };
+  }
+      ], function(){
 
-module.exports = {
-  home: function(response){
-    response.writeHeader(200, {'Content-Type': 'text/html'});
-    fs.readFile('index.html', 'utf-8', function(err, content){
-      if(err){
-        return console.log(err);
-      }
-      response.end(content, 'utf-8');
+      });*/
+      res.writeHeader(200, {'Content-Type': 'application/json'});
+      collection.find({}).toArray(function(err, arr){
+        console.log(arr);
+        res.end( JSON.stringify(arr) );
+        db.close
+      });
     });
-    console.log('Start')
   },
-  data: function(response){
-    response.writeHeader(200, {'Content-Type': 'application/json'});
-    response.end( JSON.stringify(data) );
+  create: function(res, req){
+    res.writeHeader(200, {'Content-Type': 'application/json'});
+    var body;
+    req.on('data', function(data){
+      body = data;
+    })
+    req.on('end', function(){
+       dataObject.connect().then(function(db){
+        var collection = db.collection('people');
+        console.log(qs.parse(body))
+        collection.insert( qs.parse(body), function(err, item){
+          if(err){
+            return console.log(err);
+          }
+          console.log(item[0], 222)
+          res.end(JSON.stringify(item[0]));
+        });
+      });
+    });
   }
 }

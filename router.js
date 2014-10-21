@@ -1,7 +1,7 @@
-module.exports = function(handlers, pathName, response){
+module.exports = function(handlers, pathName, res, req){
   console.log(pathName)
   if(typeof handlers[pathName] === 'function'){
-    handlers[pathName](response);
+    handlers[pathName](res, req);
   }else{
     console.log('No handlers found');
   }

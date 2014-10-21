@@ -4,40 +4,38 @@ var path = require('path');
 var fs = require('fs');
 
 function server(router, handlers){
-  http.createServer(function(request, response){
-    var pathName = url.parse(request.url).pathname;
+  http.createServer(function(req, res){
+    var pathName = url.parse(req.url).pathname;
     var tmp  = pathName.lastIndexOf('.');
-    var extension  = pathName.substring((tmp + 1));
+    var extension  = pathName.substring(tmp + 1);
     var filePath = path.join(__dirname, pathName);
     switch(extension){
       case 'css':
-        response.writeHeader(200, {'Content-Type': 'text/css'});
+        res.writeHeader(200, {'Content-Type': 'text/css'});
         break;
       case 'js':
-        response.writeHeader(200, {'Content-Type': 'text/javascript'});
+        res.writeHeader(200, {'Content-Type': 'text/javascript'});
         break;
       case 'png':
-        response.writeHeader(200, {'Content-Type': 'image/png'});
+        res.writeHeader(200, {'Content-Type': 'image/png'});
+        break;
+      case 'gif':
+        res.writeHeader(200, {'Content-Type': 'image/gif'});
         break;
       case 'jpeg':
-        response.writeHeader(200, {'Content-Type': 'image/jpeg'});
+        res.writeHeader(200, {'Content-Type': 'image/jpeg'});
         break;
       case 'jpg':
-        response.writeHeader(200, {'Content-Type': 'image/jpg'});
+        res.writeHeader(200, {'Content-Type': 'image/jpg'});
         break;
       case 'html':
-        response.writeHeader(200, {'Content-Type': 'text/html'});
+        res.writeHeader(200, {'Content-Type': 'text/html'});
         break;
       default:
-        router(handlers, pathName, response);
+        router(handlers, pathName, res, req);
         return;
     }
-    fs.readFile(filePath, 'utf-8', function(err, content){
-      if(err){
-        return console.log(err);
-      }
-      response.end(content, 'utf-8');
-    });
+    fs.createReadStream(filePath).pipe(res)
   }).listen(8080);
 }
 

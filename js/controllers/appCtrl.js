@@ -1,9 +1,8 @@
 app.controller('appCtrl', function($scope, $http, $timeout, mediator){
   $http({method: 'get', url: 'http://localhost:8080/data'}).
   success(function(data, status) {
-    $scope.people = data.people;
+    $scope.people = data;
     $scope.signIn = data.signIn;
-    $scope.counter = $scope.people.length;
   });
   $scope.selectedItem = null;
   $scope.search = function(e){
@@ -34,15 +33,16 @@ app.controller('appCtrl', function($scope, $http, $timeout, mediator){
   });
 
   mediator.subscribe('create', function(data){
-    var newItem = {
-      id: ++$scope.counter,
+    var newData = _.extend({
       position: {
         top: 8,
         left: 8
       }
-    };
-    newItem.info = data.info;
-    $scope.people.push(newItem);
+    }, {info: data.info} );
+    $http.post('http://localhost:8080/create', newData).success(function(item){
+      console.log(item)
+      $scope.people.push(item);
+    });
   });
   mediator.subscribe('selected', function(data){
     $timeout(function(){
